@@ -1,176 +1,158 @@
-Mini uyku dedektörü.
+# sleep-wake
 
-Yüzünü takip eder. İki durumda tetiklenir:
+Kamera ile uyuduğunu fark eden küçük bir uygulama.
 
-1. **Yüz ekrandan çıkınca** (öne eğilme / kameradan kaybolma)
-2. **Gözler birkaç saniye kapalı kalınca**
+Uyuyunca (yüzün kaybolunca veya gözlerin kapanınca) senin seçtiğin **görsel + müzik** açılır.  
+Uyanınca her şey kapanır.
 
-Tetiklenince senin seçtiğin **görsel + müzik** açılır: ekranın solunda görsel, sağında canlı kamera. Gözünü açınca veya yüzün geri gelince her şey kapanır, tekrar izlemeye döner.
-
----
-
-## Nasıl çalışıyor?
-
-- **MediaPipe Face Landmarker** yüz ve göz noktalarını bulur.
-- Göz açıklığı **EAR (Eye Aspect Ratio)** ile ölçülür. Değer eşiğin altına düşünce göz “kapalı” sayılır.
-- Yüz bir süre algılanmazsa “yüz gitti” sayılır.
-- Müzik `ffplay` (ffmpeg) ile, istediğin saniyeden başlatılarak çalınır (macOS / Windows).
-
-```text
-[ izleme ] --yüz yok / göz kapalı--> [ sol: görsel | sağ: kamera + müzik ]
-     ^                                         |
-     +------------- uyanınca ------------------+
-```
+Çalışır: **Mac** ve **Windows**
 
 ---
 
-## Gereksinimler
+## Ne yapar?
 
-- **macOS** veya **Windows**
-- Python 3.10+
-- Webcam
-- **ffmpeg** (`ffplay` PATH’te olmalı)
+İki durumda tetiklenir:
 
-### ffmpeg kurulumu
+1. Yüzün kameradan çıkınca  
+2. Gözlerin 2 saniye kapalı kalınca  
 
-**macOS**
+Sonra:
+
+- Solda görsel  
+- Sağda sen (kamera)  
+- Müzik çalar  
+
+Gözünü açınca veya yüzün geri gelince durur.
+
+---
+
+## Başlamadan önce
+
+Bunlar kurulu olsun:
+
+1. [Python](https://www.python.org/downloads/) (3.10 veya üzeri)  
+2. Kamera  
+3. **ffmpeg** (müzik için gerekli)
+
+### 1) ffmpeg kur
+
+**Mac** (Terminal):
 
 ```bash
 brew install ffmpeg
 ```
 
-**Windows** (PowerShell)
+**Windows** (PowerShell):
 
 ```powershell
 winget install ffmpeg
 ```
 
-Kurulumdan sonra yeni bir terminal aç; `ffplay -version` çalışıyorsa tamam.
+Kurduktan sonra terminali kapatıp yeniden aç.
 
-### Kamera izni
+Kontrol:
 
-- **macOS:** Sistem Ayarları → Gizlilik ve Güvenlik → Kamera → Terminal / Cursor
-- **Windows:** Ayarlar → Gizlilik ve güvenlik → Kamera → erişim açık olsun
+```bash
+ffplay -version
+```
+
+Bir şey yazıyorsa tamam.
+
+### 2) Kamera izni
+
+- **Mac:** Sistem Ayarları → Gizlilik ve Güvenlik → Kamera → Terminal’e izin ver  
+- **Windows:** Ayarlar → Gizlilik → Kamera → açık olsun  
 
 ---
 
-## Kurulum
+## Kurulum (bir kez)
 
-**macOS / Linux**
+### Mac
 
 ```bash
 git clone https://github.com/eisenheiim/sleep-wake.git
 cd sleep-wake
-
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-**Windows** (PowerShell / cmd)
+### Windows
 
 ```powershell
 git clone https://github.com/eisenheiim/sleep-wake.git
 cd sleep-wake
-
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
-### Model
-
-Yüz modeli `models/face_landmarker.task` olarak repoda var. Eksikse:
-
-```bash
-# macOS / Linux
-mkdir -p models
-curl -L -o models/face_landmarker.task \
-  "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
-```
-
-```powershell
-# Windows
-mkdir models -Force
-curl -L -o models/face_landmarker.task `
-  "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
-```
-
-### Görsel ve müzik (`assets/`)
-
-Repoda hazır örnek medya var. İstersen kendi dosyalarınla değiştir:
-
-| Dosya | Ne zaman? | Müzik başlangıcı |
-|--------|-----------|------------------|
-| `wake.png` + `wake.mp3` | Yüz ekrandan çıkınca | **15. saniye** |
-| `wake2.jpeg` + `wake2.mp3` | Gözler kapalı kalınca | **41. saniye** |
-
-Desteklenen uzantılar: görsel `.png` / `.jpg` / `.jpeg` / `.webp` · ses `.mp3` / `.wav` / `.m4a` / `.ogg`
-
 ---
 
-## Çalıştır
+## Çalıştırma
+
+### Mac
 
 ```bash
-# macOS
+cd sleep-wake
 source .venv/bin/activate
 python main.py
 ```
 
+### Windows
+
 ```powershell
-# Windows
+cd sleep-wake
 .\.venv\Scripts\activate
 python main.py
 ```
 
-- `q` veya `Esc` → çıkış
-- Uyanınca görsel/müzik otomatik kapanır
-
-İlk çalıştırmada kamera izni isteyebilir; izin verdikten sonra terminali yeniden başlat.
+Çıkmak için: `q`
 
 ---
 
-## Ayarlar (`main.py` üstü)
+## Görsel ve müzik
 
-| Sabit | Anlamı | Varsayılan |
-|--------|--------|------------|
-| `EYES_CLOSED_SECONDS` | Gözler kaç sn kapalı kalınca tetik | `2.0` |
-| `FACE_GONE_SECONDS` | Yüz kaç sn yoksa tetik | `0.8` |
-| `EAR_THRESHOLD` | Göz kapalı eşiği (hassasiyet) | `0.21` |
-| `AUDIO_FACE_GONE_START` | 1. müziğin başlangıç saniyesi | `15` |
-| `AUDIO_EYES_CLOSED_START` | 2. müziğin başlangıç saniyesi | `41` |
-| `SLEEP_VIEW_SCALE` | Uyku penceresinin ekran oranı | `0.82` |
-| `AWAKE_CONFIRM_SECONDS` | Uyanma debounce (titreme önleme) | `0.4` |
+Hazır dosyalar `assets/` klasöründe:
 
-Göz algısı yanlış tetikleniyorsa `EAR_THRESHOLD` değerini biraz yükselt; algılamıyorsa düşür.
+| Durum | Görsel | Müzik | Müzik nereden başlar |
+|--------|--------|--------|----------------------|
+| Yüz kaybolunca | `wake.png` | `wake.mp3` | 15. saniye |
+| Gözler kapanınca | `wake2.jpeg` | `wake2.mp3` | 41. saniye |
+
+Kendi dosyanı koymak istersen aynı isimlerle değiştirmen yeterli.
 
 ---
 
-## Proje yapısı
+## Ayarlar (istersen)
 
-```text
-sleep-wake/
-├── main.py              # uygulama
-├── requirements.txt
-├── README.md
-├── assets/
-│   ├── wake.png / wake.mp3      # yüz kaybolunca
-│   └── wake2.jpeg / wake2.mp3   # gözler kapanınca
-└── models/
-    └── face_landmarker.task
-```
+`main.py` dosyasının en üstünde:
+
+| Ayar | Ne işe yarar | Şu an |
+|------|---------------|--------|
+| `EYES_CLOSED_SECONDS` | Gözler kaç sn kapalı kalsın | `2` |
+| `FACE_GONE_SECONDS` | Yüz kaç sn yok olsun | `0.8` |
+| `AUDIO_FACE_GONE_START` | 1. müzik kaçıncı saniyeden | `15` |
+| `AUDIO_EYES_CLOSED_START` | 2. müzik kaçıncı saniyeden | `41` |
+| `EAR_THRESHOLD` | Göz algısı hassasiyeti | `0.21` |
+| `SLEEP_VIEW_SCALE` | Uyku penceresi boyutu | `0.82` |
+
+Gözü yanlış algılıyorsa `EAR_THRESHOLD` değerini biraz büyüt.  
+Algılamıyorsa biraz küçült.
 
 ---
 
-## Bağımlılıklar
+## Sorun olursa
 
-- `opencv-python` — kamera ve pencere
-- `mediapipe` — yüz / göz landmark
-- `numpy`
-- `ffmpeg` / `ffplay` — müzik (sistem paketi)
+| Problem | Ne yap |
+|---------|--------|
+| Kamera açılmıyor | Kamera iznini kontrol et, terminali yeniden aç |
+| Müzik çalmıyor | `ffplay -version` dene, ffmpeg kurulu mu bak |
+| `python` bulunamadı | Python’u kur, yeni terminal aç |
+| Paket hatası | `pip install -r requirements.txt` tekrar çalıştır |
 
 ---
 
 ## Lisans
 
-MIT — kullan, fork’la, kendi versiyonunu çek.
+MIT — istediğin gibi kullan, paylaş, değiştir.
