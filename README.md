@@ -62,18 +62,16 @@ curl -L -o models/face_landmarker.task \
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 ```
 
-### Kendi görsel ve müziğini koy
+### Görsel ve müzik (`assets/`)
 
-`assets/` klasörüne:
+Repoda hazır örnek medya var. İstersen kendi dosyalarınla değiştir:
 
-| Dosya | Ne zaman? | Varsayılan müzik başlangıcı |
-|--------|-----------|-----------------------------|
-| `wake.png` (veya `.jpg`) | Yüz ekrandan çıkınca | `wake.mp3` → **15. saniye** |
-| `wake2.png` / `wake2.jpeg` | Gözler kapalı kalınca | `wake2.mp3` → **41. saniye** |
+| Dosya | Ne zaman? | Müzik başlangıcı |
+|--------|-----------|------------------|
+| `wake.png` + `wake.mp3` | Yüz ekrandan çıkınca | **15. saniye** |
+| `wake2.jpeg` + `wake2.mp3` | Gözler kapalı kalınca | **41. saniye** |
 
-Desteklenen ses uzantıları: `.mp3`, `.wav`, `.m4a`, `.ogg`
-
-> Not: Repoda örnek medya yok — kendi dosyalarını koy.
+Desteklenen uzantılar: görsel `.png` / `.jpg` / `.jpeg` / `.webp` · ses `.mp3` / `.wav` / `.m4a` / `.ogg`
 
 ---
 
@@ -114,8 +112,9 @@ sleep-wake/
 ├── main.py              # uygulama
 ├── requirements.txt
 ├── README.md
-├── assets/              # senin görsel + müziğin (gitignore)
-│   └── .gitkeep
+├── assets/
+│   ├── wake.png / wake.mp3      # yüz kaybolunca
+│   └── wake2.jpeg / wake2.mp3   # gözler kapanınca
 └── models/
     └── face_landmarker.task
 ```
