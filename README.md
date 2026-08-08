@@ -1,7 +1,6 @@
-# sleep-wake
+# uyan-guzel-ac-gozunu
 
-Kamera ile “uyudun mu?” diyen küçük bir masaüstü uygulaması.
-
+Mini uyku dedektörü.
 Yüzünü takip eder. İki durumda tetiklenir:
 
 1. **Yüz ekrandan çıkınca** (öne eğilme / kameradan kaybolma)
@@ -9,7 +8,6 @@ Yüzünü takip eder. İki durumda tetiklenir:
 
 Tetiklenince senin seçtiğin **görsel + müzik** açılır: ekranın solunda görsel, sağında canlı kamera. Gözünü açınca veya yüzün geri gelince her şey kapanır, tekrar izlemeye döner.
 
-Instagram / Reels için ekran kaydı almak çok kolay: uygulama sade bir OpenCV penceresi.
 
 ---
 
@@ -18,7 +16,6 @@ Instagram / Reels için ekran kaydı almak çok kolay: uygulama sade bir OpenCV 
 - **MediaPipe Face Landmarker** yüz ve göz noktalarını bulur.
 - Göz açıklığı **EAR (Eye Aspect Ratio)** ile ölçülür. Değer eşiğin altına düşünce göz “kapalı” sayılır.
 - Yüz bir süre algılanmazsa “yüz gitti” sayılır.
-- Müzik macOS’ta `ffplay` ile, istediğin saniyeden başlatılarak çalınır.
 
 ```text
 [ izleme ] --yüz yok / göz kapalı--> [ sol: görsel | sağ: kamera + müzik ]
