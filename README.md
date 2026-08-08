@@ -5,7 +5,7 @@ Kamera ile uyuduğunu fark eden küçük bir uygulama.
 Uyuyunca (yüzün kaybolunca veya gözlerin kapanınca) senin seçtiğin **görsel + müzik** açılır.  
 Uyanınca her şey kapanır.
 
-Çalışır: **Mac** ve **Windows**
+**Mac** ve **Windows**
 
 ---
 
