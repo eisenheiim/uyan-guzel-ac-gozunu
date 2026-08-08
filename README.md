@@ -1,4 +1,4 @@
-# uyan-guzel-ac-gozunu
+
 
 Mini uyku dedektörü.
 Yüzünü takip eder. İki durumda tetiklenir:
