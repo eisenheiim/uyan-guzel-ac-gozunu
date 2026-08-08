@@ -70,8 +70,8 @@ Bir şey yazıyorsa tamam.
 ### Mac
 
 ```bash
-git clone https://github.com/eisenheiim/sleep-wake.git
-cd sleep-wake
+git clone https://github.com/eisenheiim/uyan-guzel-ac-gozunu.git
+cd uyan-guzel-ac-gozunu
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -80,8 +80,8 @@ pip install -r requirements.txt
 ### Windows
 
 ```powershell
-git clone https://github.com/eisenheiim/sleep-wake.git
-cd sleep-wake
+git clone https://github.com/eisenheiim/uyan-guzel-ac-gozunu.git
+cd uyan-guzel-ac-gozunu
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
@@ -94,7 +94,7 @@ pip install -r requirements.txt
 ### Mac
 
 ```bash
-cd sleep-wake
+cd uyan-guzel-ac-gozunu
 source .venv/bin/activate
 python main.py
 ```
@@ -102,7 +102,7 @@ python main.py
 ### Windows
 
 ```powershell
-cd sleep-wake
+cd uyan-guzel-ac-gozunu
 .\.venv\Scripts\activate
 python main.py
 ```
