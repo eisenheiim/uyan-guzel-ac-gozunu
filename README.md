@@ -1,13 +1,11 @@
-
-
 Mini uyku dedektörü.
+
 Yüzünü takip eder. İki durumda tetiklenir:
 
 1. **Yüz ekrandan çıkınca** (öne eğilme / kameradan kaybolma)
 2. **Gözler birkaç saniye kapalı kalınca**
 
 Tetiklenince senin seçtiğin **görsel + müzik** açılır: ekranın solunda görsel, sağında canlı kamera. Gözünü açınca veya yüzün geri gelince her şey kapanır, tekrar izlemeye döner.
-
 
 ---
 
@@ -16,6 +14,7 @@ Tetiklenince senin seçtiğin **görsel + müzik** açılır: ekranın solunda g
 - **MediaPipe Face Landmarker** yüz ve göz noktalarını bulur.
 - Göz açıklığı **EAR (Eye Aspect Ratio)** ile ölçülür. Değer eşiğin altına düşünce göz “kapalı” sayılır.
 - Yüz bir süre algılanmazsa “yüz gitti” sayılır.
+- Müzik `ffplay` (ffmpeg) ile, istediğin saniyeden başlatılarak çalınır (macOS / Windows).
 
 ```text
 [ izleme ] --yüz yok / göz kapalı--> [ sol: görsel | sağ: kamera + müzik ]
@@ -27,18 +26,37 @@ Tetiklenince senin seçtiğin **görsel + müzik** açılır: ekranın solunda g
 
 ## Gereksinimler
 
-- macOS (müzik için `ffplay` / Homebrew `ffmpeg`)
+- **macOS** veya **Windows**
 - Python 3.10+
 - Webcam
-- Kamera izni (Sistem Ayarları → Gizlilik ve Güvenlik → Kamera → Terminal veya Cursor)
+- **ffmpeg** (`ffplay` PATH’te olmalı)
+
+### ffmpeg kurulumu
+
+**macOS**
 
 ```bash
 brew install ffmpeg
 ```
 
+**Windows** (PowerShell)
+
+```powershell
+winget install ffmpeg
+```
+
+Kurulumdan sonra yeni bir terminal aç; `ffplay -version` çalışıyorsa tamam.
+
+### Kamera izni
+
+- **macOS:** Sistem Ayarları → Gizlilik ve Güvenlik → Kamera → Terminal / Cursor
+- **Windows:** Ayarlar → Gizlilik ve güvenlik → Kamera → erişim açık olsun
+
 ---
 
 ## Kurulum
+
+**macOS / Linux**
 
 ```bash
 git clone https://github.com/eisenheiim/sleep-wake.git
@@ -49,13 +67,32 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+**Windows** (PowerShell / cmd)
+
+```powershell
+git clone https://github.com/eisenheiim/sleep-wake.git
+cd sleep-wake
+
+python -m venv .venv
+.\.venv\Scripts\activate
+pip install -r requirements.txt
+```
+
 ### Model
 
 Yüz modeli `models/face_landmarker.task` olarak repoda var. Eksikse:
 
 ```bash
+# macOS / Linux
 mkdir -p models
 curl -L -o models/face_landmarker.task \
+  "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+```
+
+```powershell
+# Windows
+mkdir models -Force
+curl -L -o models/face_landmarker.task `
   "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
 ```
 
@@ -75,14 +112,21 @@ Desteklenen uzantılar: görsel `.png` / `.jpg` / `.jpeg` / `.webp` · ses `.mp3
 ## Çalıştır
 
 ```bash
+# macOS
 source .venv/bin/activate
+python main.py
+```
+
+```powershell
+# Windows
+.\.venv\Scripts\activate
 python main.py
 ```
 
 - `q` veya `Esc` → çıkış
 - Uyanınca görsel/müzik otomatik kapanır
 
-İlk çalıştırmada macOS kamera izni isteyebilir. İzin verdikten sonra uygulamayı (Terminal/Cursor) yeniden başlat.
+İlk çalıştırmada kamera izni isteyebilir; izin verdikten sonra terminali yeniden başlat.
 
 ---
 

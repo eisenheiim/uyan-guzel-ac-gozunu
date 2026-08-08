@@ -12,7 +12,9 @@ Göz açılınca veya yüz geri gelince görsel/müzik kapanır.
 
 from __future__ import annotations
 
+import shutil
 import subprocess
+import sys
 import time
 from pathlib import Path
 
@@ -21,6 +23,9 @@ import mediapipe as mp
 import numpy as np
 from mediapipe.tasks.python import vision
 from mediapipe.tasks.python.core import base_options as base_options_module
+
+IS_MAC = sys.platform == "darwin"
+IS_WIN = sys.platform.startswith("win")
 
 # --- Ayarlar ---
 EYES_CLOSED_SECONDS = 2.0
@@ -74,20 +79,78 @@ def load_image(path: Path) -> np.ndarray:
 
 
 def screen_size() -> tuple[int, int]:
-    """macOS masaüstü boyutu; başarısızsa varsayılan."""
-    try:
-        out = subprocess.check_output(
+    """Masaüstü boyutu (macOS / Windows); başarısızsa varsayılan."""
+    if IS_WIN:
+        try:
+            import ctypes
+
+            user32 = ctypes.windll.user32
+            return max(800, int(user32.GetSystemMetrics(0))), max(
+                600, int(user32.GetSystemMetrics(1))
+            )
+        except Exception:
+            return 1440, 900
+    if IS_MAC:
+        try:
+            out = subprocess.check_output(
+                [
+                    "osascript",
+                    "-e",
+                    'tell application "Finder" to get bounds of window of desktop',
+                ],
+                text=True,
+            ).strip()
+            parts = [int(p.strip()) for p in out.split(",")]
+            return max(800, parts[2] - parts[0]), max(600, parts[3] - parts[1])
+        except Exception:
+            pass
+    return 1440, 900
+
+
+def open_camera(index: int = CAMERA_INDEX) -> cv2.VideoCapture:
+    """Platforma uygun kamera backend'i dener."""
+    backends: list[int] = []
+    if IS_MAC:
+        backends.append(cv2.CAP_AVFOUNDATION)
+    elif IS_WIN:
+        backends.extend([cv2.CAP_DSHOW, cv2.CAP_MSMF])
+    backends.append(cv2.CAP_ANY)
+
+    for backend in backends:
+        cap = cv2.VideoCapture(index, backend)
+        if cap.isOpened():
+            return cap
+        cap.release()
+    return cv2.VideoCapture(index)
+
+
+def print_camera_help() -> None:
+    if IS_MAC:
+        print(
+            "Kamera açılamadı — büyük ihtimalle macOS kamera izni yok.\n\n"
+            "Sistem Ayarları → Gizlilik ve Güvenlik → Kamera\n"
+            "  → Terminal / Cursor / Python için izni AÇ\n\n"
+            "Sonra uygulamayı yeniden başlatıp tekrar dene:\n"
+            "  python main.py"
+        )
+        subprocess.run(
             [
-                "osascript",
-                "-e",
-                'tell application "Finder" to get bounds of window of desktop',
+                "open",
+                "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera",
             ],
-            text=True,
-        ).strip()
-        parts = [int(p.strip()) for p in out.split(",")]
-        return max(800, parts[2] - parts[0]), max(600, parts[3] - parts[1])
-    except Exception:
-        return 1440, 900
+            check=False,
+        )
+    elif IS_WIN:
+        print(
+            "Kamera açılamadı.\n\n"
+            "Windows Ayarlar → Gizlilik ve güvenlik → Kamera\n"
+            "  → Kamera erişiminin açık olduğundan emin ol\n"
+            "  → Masaüstü uygulamalarının kameraya erişmesine izin ver\n\n"
+            "Başka bir uygulama kamerayı kullanıyorsa kapatıp tekrar dene:\n"
+            "  python main.py"
+        )
+    else:
+        print("Kamera açılamadı. CAMERA_INDEX değerini veya izinleri kontrol et.")
 
 
 def fit_cover(img: np.ndarray, size: tuple[int, int]) -> np.ndarray:
@@ -116,16 +179,31 @@ def compose_split(
     return np.hstack([left, right])
 
 
+def find_ffplay() -> str | None:
+    return shutil.which("ffplay")
+
+
 class MusicPlayer:
-    """ffplay ile müzik — istenen saniyeden başlar, döngüde çalar."""
+    """ffplay ile müzik — macOS / Windows; istenen saniyeden başlar, döngüde çalar."""
 
     def __init__(self) -> None:
         self._proc: subprocess.Popen | None = None
+        self._ffplay = find_ffplay()
+        if self._ffplay is None:
+            tip = (
+                "winget install ffmpeg  veya  choco install ffmpeg"
+                if IS_WIN
+                else "brew install ffmpeg"
+            )
+            raise RuntimeError(
+                "ffplay bulunamadı. ffmpeg kurulu olmalı ve PATH'te olmalı.\n"
+                f"  {tip}"
+            )
 
     def play(self, path: Path, start_seconds: float = 0) -> None:
         self.stop()
         cmd = [
-            "ffplay",
+            self._ffplay,
             "-nodisp",
             "-autoexit",
             "-loglevel",
@@ -136,11 +214,14 @@ class MusicPlayer:
             str(max(0.0, float(start_seconds))),
             str(path),
         ]
-        self._proc = subprocess.Popen(
-            cmd,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL,
-        )
+        kwargs: dict = {
+            "stdout": subprocess.DEVNULL,
+            "stderr": subprocess.DEVNULL,
+        }
+        if IS_WIN:
+            # Konsolda ekstra siyah ffplay penceresi açılmasın
+            kwargs["creationflags"] = getattr(subprocess, "CREATE_NO_WINDOW", 0)
+        self._proc = subprocess.Popen(cmd, **kwargs)
 
     def stop(self) -> None:
         if self._proc is not None:
@@ -208,25 +289,9 @@ def main() -> None:
     music = MusicPlayer()
     landmarker = create_landmarker()
 
-    # macOS'ta AVFoundation backend izin diyaloğunu daha güvenilir tetikler
-    cap = cv2.VideoCapture(CAMERA_INDEX, cv2.CAP_AVFOUNDATION)
+    cap = open_camera(CAMERA_INDEX)
     if not cap.isOpened():
-        cap = cv2.VideoCapture(CAMERA_INDEX)
-    if not cap.isOpened():
-        print(
-            "Kamera açılamadı — büyük ihtimalle macOS kamera izni yok.\n\n"
-            "Sistem Ayarları → Gizlilik ve Güvenlik → Kamera\n"
-            "  → Cursor (ve/veya Terminal) için izni AÇ\n\n"
-            "Sonra Cursor'ı tamamen kapatıp yeniden aç, tekrar dene:\n"
-            "  python main.py"
-        )
-        subprocess.run(
-            [
-                "open",
-                "x-apple.systempreferences:com.apple.preference.security?Privacy_Camera",
-            ],
-            check=False,
-        )
+        print_camera_help()
         return
 
     cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
