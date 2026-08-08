@@ -1,4 +1,4 @@
-# sleep-wake
+#uyan güzeel ac gözünü
 
 Kamera ile uyuduğunu fark eden küçük bir uygulama.
 
