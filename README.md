@@ -1,12 +1,33 @@
-
-
+# sleep-wake
 
 Kamera ile uyuduğunu fark eden küçük bir uygulama.
 
 Uyuyunca (yüzün kaybolunca veya gözlerin kapanınca) senin seçtiğin **görsel + müzik** açılır.  
 Uyanınca her şey kapanır.
 
-**Mac** ve **Windows**
+İki yol:
+
+- **Web sitesi** — tarayıcıda, kurulum yok  
+- **Masaüstü (Python)** — Mac / Windows
+
+---
+
+## Web (önerilen)
+
+Canlı site: **https://eisenheiim.github.io/sleep-wake/**
+
+Lokal denemek için proje klasöründe:
+
+```bash
+python3 -m http.server 8080
+```
+
+Tarayıcıda aç: [http://localhost:8080](http://localhost:8080)
+
+**Kamerayı aç** → izin ver.  
+`q` yok; sağ üstten **Durdur**.
+
+Kamera için `localhost` veya HTTPS gerekir.
 
 ---
 
@@ -71,8 +92,8 @@ Bir şey yazıyorsa tamam.
 ### Mac
 
 ```bash
-git clone https://github.com/eisenheiim/uyan-guzel-ac-gozunu.git
-cd uyan-guzel-ac-gozunu
+git clone https://github.com/eisenheiim/sleep-wake.git
+cd sleep-wake
 python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
@@ -81,8 +102,8 @@ pip install -r requirements.txt
 ### Windows
 
 ```powershell
-git clone https://github.com/eisenheiim/uyan-guzel-ac-gozunu.git
-cd uyan-guzel-ac-gozunu
+git clone https://github.com/eisenheiim/sleep-wake.git
+cd sleep-wake
 python -m venv .venv
 .\.venv\Scripts\activate
 pip install -r requirements.txt
@@ -95,7 +116,7 @@ pip install -r requirements.txt
 ### Mac
 
 ```bash
-cd uyan-guzel-ac-gozunu
+cd sleep-wake
 source .venv/bin/activate
 python main.py
 ```
@@ -103,7 +124,7 @@ python main.py
 ### Windows
 
 ```powershell
-cd uyan-guzel-ac-gozunu
+cd sleep-wake
 .\.venv\Scripts\activate
 python main.py
 ```
@@ -147,8 +168,10 @@ Algılamıyorsa biraz küçült.
 
 | Problem | Ne yap |
 |---------|--------|
-| Kamera açılmıyor | Kamera iznini kontrol et, terminali yeniden aç |
-| Müzik çalmıyor | `ffplay -version` dene, ffmpeg kurulu mu bak |
+| Kamera açılmıyor (web) | `localhost` veya canlı HTTPS sitesini kullan; tarayıcı kamera iznini kontrol et |
+| Model yüklenmiyor | İnternet gerekir (MediaPipe WASM CDN); `models/face_landmarker.task` yerinde mi bak |
+| Kamera açılmıyor (Python) | Kamera iznini kontrol et, terminali yeniden aç |
+| Müzik çalmıyor (Python) | `ffplay -version` dene, ffmpeg kurulu mu bak |
 | `python` bulunamadı | Python’u kur, yeni terminal aç |
 | Paket hatası | `pip install -r requirements.txt` tekrar çalıştır |
 

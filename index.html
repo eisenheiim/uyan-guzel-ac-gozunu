@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="tr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sleep-wake</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Outfit:wght@400;500;600&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="atmosphere" aria-hidden="true"></div>
+
+    <main class="app">
+      <section class="gate" id="gate">
+        <p class="brand">sleep-wake</p>
+        <h1>Uyuyunca uyanır.</h1>
+        <p class="lede">
+          Yüzün kaybolunca veya gözlerin kapanınca görsel ve müzik açılır.
+          Uyanınca her şey kapanır.
+        </p>
+        <div class="cta-row">
+          <button type="button" class="btn primary" id="startBtn">
+            Kamerayı aç
+          </button>
+        </div>
+        <p class="hint" id="gateHint">Kamera izni gerekir · tarayıcıda çalışır</p>
+      </section>
+
+      <section class="stage hidden" id="stage" aria-live="polite">
+        <header class="topbar">
+          <p class="brand compact">sleep-wake</p>
+          <p class="status" id="status">hazırlanıyor…</p>
+          <button type="button" class="btn ghost" id="stopBtn">Durdur</button>
+        </header>
+
+        <div class="viewport" id="viewport">
+          <div class="panel wake-panel" id="wakePanel" hidden>
+            <img id="wakeImage" alt="Uyandırma görseli" />
+          </div>
+          <div class="panel cam-panel">
+            <video id="video" playsinline autoplay muted></video>
+            <canvas id="overlay" aria-hidden="true"></canvas>
+            <p class="countdown" id="countdown" hidden></p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <audio id="audio" loop preload="auto"></audio>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
